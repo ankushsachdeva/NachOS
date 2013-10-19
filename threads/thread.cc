@@ -356,7 +356,7 @@ Thread::Sleep ()
     Thread *nextThread;
     lastActive = stats->totalTicks;
 
-    burst_estimation = 0.5*((stats->totalTicks)-current_burst_init_value)+0.5*burst_estimation;
+    
 
     ASSERT(totalBurst >= 0);
     DEBUG('k', "\nTotalBurst :: %d %d PID :: %d\n", totalBurst, stats->totalTicks, pid);
