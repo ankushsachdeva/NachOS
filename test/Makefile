@@ -37,7 +37,7 @@ CPP = /usr/bin/cpp
 INCDIR =-I../userprog -I../threads
 CFLAGS = -G 0 -c $(INCDIR)
 
-all: halt shell matmult sort printtest vectorsum testregPA forkjoin testexec testyield testloop forkjoin_hard
+all: halt shell matmult sort printtest vectorsum testregPA forkjoin testexec testyield testloop forkjoin_hard testloop1 testloop2 testloop3
 
 start.o: start.s ../userprog/syscall.h
 	$(CPP) $(CPPFLAGS) start.s > strt.s
@@ -144,5 +144,29 @@ forkjoin_hard: forkjoin_hard.o start.o
 	$(LD) $(LDFLAGS) start.o forkjoin_hard.o -o forkjoin_hard.coff
 	../bin/coff2noff forkjoin_hard.coff forkjoin_hard
 
+testloop1.o: testloop1.c
+	$(CC) $(INCDIR) -S testloop1.c -o testloop1.s
+	$(AS) $(CFLAGS) testloop1.s -o testloop1.o
+	rm -f testloop1.s
+testloop1: testloop1.o start.o
+	$(LD) $(LDFLAGS) start.o testloop1.o -o testloop1.coff
+	../bin/coff2noff testloop1.coff testloop1
+
+testloop2.o: testloop2.c
+	$(CC) $(INCDIR) -S testloop2.c -o testloop2.s
+	$(AS) $(CFLAGS) testloop2.s -o testloop2.o
+	rm -f testloop2.s
+testloop2: testloop2.o start.o
+	$(LD) $(LDFLAGS) start.o testloop2.o -o testloop2.coff
+	../bin/coff2noff testloop2.coff testloop2
+
+testloop3.o: testloop3.c
+	$(CC) $(INCDIR) -S testloop3.c -o testloop3.s
+	$(AS) $(CFLAGS) testloop3.s -o testloop3.o
+	rm -f testloop3.s
+testloop3: testloop3.o start.o
+	$(LD) $(LDFLAGS) start.o testloop3.o -o testloop3.coff
+	../bin/coff2noff testloop3.coff testloop3
+
 clean:
-	rm -f start.o halt.o halt shell.o shell sort.o sort matmult.o matmult halt.coff shell.coff sort.coff matmult.coff printtest.o printtest printtest.coff vectorsum.o vectorsum.coff vectorsum testregPA.o testregPA.coff testregPA forkjoin.o forkjoin.coff forkjoin testexec.o testexec.coff testexec testyield.o testyield.coff testyield testloop.o testloop.coff testloop forkjoin_hard.o forkjoin_hard.coff forkjoin_hard
+	rm -f start.o halt.o halt shell.o shell sort.o sort matmult.o matmult halt.coff shell.coff sort.coff matmult.coff printtest.o printtest printtest.coff vectorsum.o vectorsum.coff vectorsum testregPA.o testregPA.coff testregPA forkjoin.o forkjoin.coff forkjoin testexec.o testexec.coff testexec testyield.o testyield.coff testyield testloop.o testloop.coff testloop forkjoin_hard.o forkjoin_hard.s forkjoin_hard testloop1.o testloop1.coff testloop1 testloop2.o testloop2.coff testloop2 testloop3.o testloop3.coff testloop3
