@@ -114,7 +114,7 @@ StartJobs(List *jobList)
                   printf("%d\n", elem->key);
 
                   Thread* newThread;
-                  newThread = new Thread((char *)elem->item, true);
+                  newThread = new Thread((char *)elem->item, true, elem->key);
 
                   space = new AddrSpace(executable);    
                   newThread->space = space;

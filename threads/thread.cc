@@ -41,6 +41,7 @@ Thread::Thread(char* threadName)
     int i;
     threadCount++;
 
+    priority = 100;
     name = threadName;
     stackTop = NULL;
     stack = NULL;
@@ -69,10 +70,11 @@ Thread::Thread(char* threadName)
     for (i=0; i<MAX_CHILD_COUNT; i++) exitedChild[i] = false;
 }
 
-Thread::Thread(char* threadName, bool orphan)
+Thread::Thread(char* threadName, bool orphan, int prio)
 {
     int i;
     threadCount++;
+    priority = prio;
 
     name = threadName;
     stackTop = NULL;

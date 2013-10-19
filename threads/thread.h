@@ -83,11 +83,12 @@ class Thread {
     int machineState[MachineStateSize];  // all registers except for stackTop
 
   public:
+    int priority;
     char* name;
     float burst_estimation;
     int current_burst_init_value;
     Thread(char* debugName);		// initialize a Thread
-    Thread(char* threadName, bool orphan);
+    Thread(char* threadName, bool orphan, int priori);
     ~Thread(); 				// deallocate a Thread
 					// NOTE -- thread being deleted
 					// must not be running when delete 
