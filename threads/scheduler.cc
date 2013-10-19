@@ -113,10 +113,16 @@ Scheduler::Run (Thread *nextThread)
     // a bit to figure out what happens after this, both from the point
     // of view of the thread and from the perspective of the "outside world".
 
+
+    if(startTime != -1 && oldThread->current_burst_init_value != -1)
+      oldThread->totalBurst += (stats->totalTicks - oldThread->current_burst_init_value);
+
     _SWITCH(oldThread, nextThread);
 
-    nextThread->totalWait = (stats->totalTicks - nextThread->lastActive);    
-    currentThread->current_burst_init_value=stats->totalTicks;
+
+    if(startTime == -1) startTime = stats->totalTicks;
+    currentThread->totalWait += (stats->totalTicks - currentThread->lastActive);    
+    currentThread->current_burst_init_value = stats->totalTicks;
     
     DEBUG('t', "Now in thread \"%s\"\n", currentThread->getName());
 

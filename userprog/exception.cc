@@ -1,3 +1,4 @@
+// EXCEPTION
 // exception.cc 
 //	Entry point into the Nachos kernel from user programs.
 //	There are two kinds of things that can cause control to
@@ -108,10 +109,19 @@ ExceptionHandler(ExceptionType which)
        exitcode = machine->ReadRegister(4);
        printf("[pid %d]: Exit called. Code: %d %s\n", currentThread->GetPID(), exitcode, currentThread->name);
        printf("WaitTime :: %d, TotalBurst :: %d\n", currentThread->totalWait, currentThread->totalBurst);
+
+       //
+       totalWaitTime += currentThread->totalWait;
+       totalBurstTime += currentThread->totalBurst;
+       //
+       
        threadCount--;
        printf("Thread Count : %d\n",threadCount);
        if(threadCount==1){
          simulationTime = stats->totalTicks - startTime;
+         printf("Total Simulation time :: %d\nBurst Time :: %ld\n", simulationTime, totalBurstTime);
+         printf("Total Wait Time :: %d\n", totalWaitTime);
+         printf("Burst Efficiency :: %lf\n", ((double)totalBurstTime/simulationTime)*100); 
          interrupt->Halt();
        }
 

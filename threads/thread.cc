@@ -26,7 +26,6 @@
 					// execution stack, for detecting 
 					// stack overflows
 
-extern int threadCount;
 
 //----------------------------------------------------------------------
 // Thread::Thread
@@ -44,8 +43,9 @@ Thread::Thread(char* threadName)
     totalWait = 0;
     lastActive = stats->totalTicks;
     totalBurst = 0;
-
+    current_burst_init_value = -1;
     priority = 100;
+
     name = threadName;
     stackTop = NULL;
     stack = NULL;
@@ -82,6 +82,7 @@ Thread::Thread(char* threadName, bool orphan, int prio)
     totalWait = 0;
     lastActive = stats->totalTicks;
     totalBurst = 0;
+    current_burst_init_value = -1;    
 
     name = threadName;
     stackTop = NULL;
@@ -356,13 +357,9 @@ Thread::Sleep ()
     lastActive = stats->totalTicks;
 
     burst_estimation = 0.5*((stats->totalTicks)-current_burst_init_value)+0.5*burst_estimation;
-    totalBurst += burst_estimation;
-    if(currentThread == threadToBeDestroyed)
-    {
-            totalWaitTime += totalWait;
-            totalBurstTime += totalBurst;
-    }
-    if(startTime == -1) startTime = stats->totalTicks;
+
+    ASSERT(totalBurst >= 0);
+    DEBUG('k', "\nTotalBurst :: %d %d PID :: %d\n", totalBurst, stats->totalTicks, pid);
 
     ASSERT(this == currentThread);
     ASSERT(interrupt->getLevel() == IntOff);
@@ -610,3 +607,4 @@ Thread::SortedInsertInWaitQueue (unsigned when)
    (void) interrupt->SetLevel(oldLevel);
 }
 #endif
+
