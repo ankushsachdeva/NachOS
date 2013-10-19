@@ -41,6 +41,10 @@ Thread::Thread(char* threadName)
     int i;
     threadCount++;
 
+    totalWait = 0;
+    lastActive = stats->totalTicks;
+    totalBurst = 0;
+
     priority = 100;
     name = threadName;
     stackTop = NULL;
@@ -54,7 +58,6 @@ Thread::Thread(char* threadName)
     printf("pid =%d\n",thread_index);
     pid = thread_index;
     burst_estimation=0;
-    current_burst_init_value=stats->totalTicks;
     
     thread_index++;
     ASSERT(thread_index < MAX_THREAD_COUNT);
@@ -76,6 +79,10 @@ Thread::Thread(char* threadName, bool orphan, int prio)
     threadCount++;
     priority = prio;
 
+    totalWait = 0;
+    lastActive = stats->totalTicks;
+    totalBurst = 0;
+
     name = threadName;
     stackTop = NULL;
     stack = NULL;
@@ -88,7 +95,7 @@ Thread::Thread(char* threadName, bool orphan, int prio)
     printf("pid =%d\n",thread_index);
     pid = thread_index;
     burst_estimation=0;
-    current_burst_init_value=stats->totalTicks;
+    
     thread_index++;
     ASSERT(thread_index < MAX_THREAD_COUNT);
     if (currentThread != NULL && !orphan) {
@@ -211,6 +218,7 @@ Thread::Finish ()
     DEBUG('t', "Finishing thread \"%s\"\n", getName());
     
     threadToBeDestroyed = currentThread;
+    
     Sleep();					// invokes SWITCH
     // not reached
 }
@@ -227,11 +235,11 @@ Thread::SetChildExitCode (int childpid, int ecode)
 
    // Find out which child
    for (i=0; i<childcount; i++) {
-     printf("child pid array = %d\n",childpidArray[i]);
-      if (childpid == childpidArray[i]) break;
+           //printf("child pid array = %d\n",childpidArray[i]);
+           if (childpid == childpidArray[i]) break;
    }
 
-   printf("i :: %d, childCount :: %d %d\n", i, thread_index);
+   //printf("i :: %d, childCount :: %d %d\n", i, thread_index);
    ASSERT(i < childcount);
    childexitcode[i] = ecode;
    exitedChild[i] = true;
@@ -345,7 +353,17 @@ void
 Thread::Sleep ()
 {
     Thread *nextThread;
-    burst_estimation=0.5*((stats->totalTicks)-current_burst_init_value)+0.5*burst_estimation;
+    lastActive = stats->totalTicks;
+
+    burst_estimation = 0.5*((stats->totalTicks)-current_burst_init_value)+0.5*burst_estimation;
+    totalBurst += burst_estimation;
+    if(currentThread == threadToBeDestroyed)
+    {
+            totalWaitTime += totalWait;
+            totalBurstTime += totalBurst;
+    }
+    if(startTime == -1) startTime = stats->totalTicks;
+
     ASSERT(this == currentThread);
     ASSERT(interrupt->getLevel() == IntOff);
     DEBUG('l',"\n\n-------------\n");
@@ -360,15 +378,16 @@ Thread::Sleep ()
       interrupt->Idle();
     }
  
-     DEBUG('l',"Ready list before\n");
+    DEBUG('l',"Ready list before\n");
     scheduler->Print();
     scheduler->SortByShortestBurstTime();
     DEBUG('l',"\n\nReady List after\n");
     scheduler->Print();
     DEBUG('l',"------------\n\n\n");
     nextThread = scheduler->FindNextToRun();
-    DEBUG('l',"Now Running %d-%s\n",GetPID(),nextThread->getName() );    
-    scheduler->Run(nextThread); // returns when we've been signalled
+    DEBUG('l',"Now Running %d-%s\n",GetPID(),nextThread->getName() );
+
+    scheduler->Run(nextThread); // returns when we've been signalled    
 }
 
 //----------------------------------------------------------------------

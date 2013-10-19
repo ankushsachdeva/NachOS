@@ -29,6 +29,10 @@ bool exitThreadArray[MAX_THREAD_COUNT];  //Marks exited threads
 TimeSortedWaitQueue *sleepQueueHead;	// Needed to implement SC_Sleep
 
 int threadCount;
+int totalWaitTime;
+int totalBurstTime;
+int simulationTime;
+int startTime;
 
 #ifdef FILESYS_NEEDED
 FileSystem  *fileSystem;

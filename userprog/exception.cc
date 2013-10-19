@@ -107,9 +107,11 @@ ExceptionHandler(ExceptionType which)
     else if ((which == SyscallException) && (type == SC_Exit)) {
        exitcode = machine->ReadRegister(4);
        printf("[pid %d]: Exit called. Code: %d %s\n", currentThread->GetPID(), exitcode, currentThread->name);
+       printf("WaitTime :: %d, TotalBurst :: %d\n", currentThread->totalWait, currentThread->totalBurst);
        threadCount--;
        printf("Thread Count : %d\n",threadCount);
        if(threadCount==1){
+         simulationTime = stats->totalTicks - startTime;
          interrupt->Halt();
        }
 

@@ -82,6 +82,10 @@ int
 main(int argc, char **argv)
 {
   threadCount = 0;
+  totalWaitTime = 0;
+  totalBurstTime = 0;
+  startTime = -1;
+
     int argCount;			// the number of arguments 
 					// for a particular command
 

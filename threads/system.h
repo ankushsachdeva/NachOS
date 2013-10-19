@@ -38,6 +38,10 @@ extern bool initializedConsoleSemaphores;	// Used to initialize the semaphores f
 extern bool exitThreadArray[];		// Marks exited threads
 
 extern int threadCount;
+extern int totalWaitTime;
+extern int totalBurstTime;
+extern int simulationTime;
+extern int startTime;
 
 class TimeSortedWaitQueue {		// Needed to implement SC_Sleep
 private:

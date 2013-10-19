@@ -104,7 +104,6 @@ Scheduler::Run (Thread *nextThread)
 
     currentThread = nextThread;		    // switch to the next thread
     currentThread->setStatus(RUNNING);      // nextThread is now running
-    currentThread->current_burst_init_value=stats->totalTicks;
     
     DEBUG('t', "Switching from thread \"%s\" to thread \"%s\"\n",
 	  oldThread->getName(), nextThread->getName());
@@ -115,6 +114,9 @@ Scheduler::Run (Thread *nextThread)
     // of view of the thread and from the perspective of the "outside world".
 
     _SWITCH(oldThread, nextThread);
+
+    nextThread->totalWait = (stats->totalTicks - nextThread->lastActive);    
+    currentThread->current_burst_init_value=stats->totalTicks;
     
     DEBUG('t', "Now in thread \"%s\"\n", currentThread->getName());
 

@@ -81,9 +81,14 @@ class Thread {
     // THEY MUST be in this position for SWITCH to work.
     int* stackTop;			 // the current stack pointer
     int machineState[MachineStateSize];  // all registers except for stackTop
-
+    
   public:
+
     int priority;
+    int totalWait;
+    int lastActive;
+    int totalBurst;
+
     char* name;
     float burst_estimation;
     int current_burst_init_value;
