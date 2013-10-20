@@ -175,6 +175,24 @@ List* handleBatch(FILE *jobList)
         
         printf("Starting\n");
         char line[1000];
+        fgets(line,1000, jobList);
+        int ll=0;
+        while(line[ll] != 0) ll++;
+        if(ll==3)
+            scheduling_algorithm=10;
+        else
+            scheduling_algorithm=line[0]-'0';
+        if(scheduling_algorithm==3||scheduling_algorithm==7){
+            schedulingQuantum=testloopAvgBurstLength/4;
+        }
+        else if(scheduling_algorithm==4||scheduling_algorithm==8){
+            schedulingQuantum=testloopAvgBurstLength/2;
+        }
+        else if(scheduling_algorithm==5||scheduling_algorithm==9){
+            schedulingQuantum=3*testloopAvgBurstLength/4;
+        }
+
+        DEBUG('l',"Starting reading of batch file.Will be using scheduling_algorithm %d\n",scheduling_algorithm);
         while(fgets(line, 1000, jobList) != NULL)
         {
                 
@@ -227,7 +245,7 @@ List* handleBatch(FILE *jobList)
                 char *curr = new char[stop];
                 for(int i = 0; i < stop-1; i++)
                         curr[i] = line[i];
-                elems->SortedInsert(curr, priority);
+                elems->SortedInsert(curr, priority+50);
         }
         /*
         ListElement *elem = elems->getFirst();

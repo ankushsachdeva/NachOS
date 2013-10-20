@@ -273,6 +273,32 @@ Thread::Exit (bool terminateSim, int exitcode)
 
     Thread *nextThread;
 
+    if(startTime != -1 && current_burst_init_value != -1)
+    {
+      totalBurst += (stats->totalTicks - current_burst_init_value);
+
+    }
+    
+    burst_estimation = 0.5*((stats->totalTicks) - 
+                                       current_burst_init_value)
+      +0.5*burst_estimation;
+
+
+       //
+       totalWaitTime += currentThread->totalWait;
+       totalBurstTime += currentThread->totalBurst;
+       //
+       simulationTime = stats->totalTicks - startTime;
+        // printf("Total Simulation time :: %d\nBurst Time :: %ld\n", simulationTime, totalBurstTime);
+        //  printf("Total Wait Time :: %d\n", totalWaitTime);
+        //  printf("Burst Efficiency :: %lf\n", ((double)totalBurstTime/simulationTime)*100); 
+
+    printf("Sim Time %d PID :: BT%d :: Efficiency %lf\n ", (stats->totalTicks)-startTime, totalBurstTime,(totalBurstTime*1.0)/((stats->totalTicks)-startTime));
+    
+
+    currentThread->lastActive = stats->totalTicks;
+
+
     status = BLOCKED;
 
     // Set exit code in parent's structure provided the parent hasn't exited
@@ -317,6 +343,17 @@ void
 Thread::Yield ()
 {
     Thread *nextThread;
+
+    if(startTime != -1 && current_burst_init_value != -1){
+      totalBurst += (stats->totalTicks - current_burst_init_value);
+
+    }
+    
+    burst_estimation = 0.5*((stats->totalTicks) - 
+                                       current_burst_init_value)
+      +0.5*burst_estimation;
+
+
     IntStatus oldLevel = interrupt->SetLevel(IntOff);
     
     ASSERT(this == currentThread);
@@ -354,8 +391,6 @@ void
 Thread::Sleep ()
 {
     Thread *nextThread;
-    lastActive = stats->totalTicks;
-
     
 
     ASSERT(totalBurst >= 0);
@@ -368,18 +403,32 @@ Thread::Sleep ()
     DEBUG('l',"\n\nSleeping thread %d-%s\n\n",GetPID(),getName() );
    
     DEBUG('t', "Sleeping thread \"%s\"\n", getName());
+    if(startTime != -1 && current_burst_init_value != -1)
+    {
+      totalBurst += (stats->totalTicks - current_burst_init_value);
+
+    }
     
+    burst_estimation = 0.5*((stats->totalTicks) - 
+                                       current_burst_init_value)
+      +0.5*burst_estimation;
     
     status = BLOCKED;
+    currentThread->lastActive = stats->totalTicks;
+
+
+
     while(scheduler->getReadyList()->IsEmpty()){
       interrupt->Idle();
     }
  
     DEBUG('l',"Ready list before\n");
-    scheduler->Print();
-    scheduler->SortByShortestBurstTime();
+    // scheduler->Print();
+    if(scheduling_algorithm==2)
+      scheduler->SortByShortestBurstTime();
+    
     DEBUG('l',"\n\nReady List after\n");
-    scheduler->Print();
+    //scheduler->Print();
     DEBUG('l',"------------\n\n\n");
     nextThread = scheduler->FindNextToRun();
     DEBUG('l',"Now Running %d-%s\n",GetPID(),nextThread->getName() );

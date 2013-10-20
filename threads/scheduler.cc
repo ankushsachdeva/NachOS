@@ -110,26 +110,31 @@ Scheduler::Run (Thread *nextThread)
     
     // 
     // 
-    if(startTime != -1 && oldThread->current_burst_init_value != -1)
-      oldThread->totalBurst += (stats->totalTicks - oldThread->current_burst_init_value);
+    // if(startTime != -1 && oldThread->current_burst_init_value != -1)
+    //   oldThread->totalBurst += (stats->totalTicks - oldThread->current_burst_init_value);
     
-    oldThread->burst_estimation = 0.5*((stats->totalTicks) - 
-                                       oldThread->current_burst_init_value)
-      +0.5*oldThread->burst_estimation;
-
+    // oldThread->burst_estimation = 0.5*((stats->totalTicks) - 
+    //                                    oldThread->current_burst_init_value)
+    //   +0.5*oldThread->burst_estimation;
     // This is a machine-dependent assembly language routine defined 
     // in switch.s.  You may have to think
     // a bit to figure out what happens after this, both from the point
     // of view of the thread and from the perspective of the "outside world".    
 
-    _SWITCH(oldThread, nextThread);
-
+    // printf("CCC :: %d PID :: %d\n", currentThread->current_burst_init_value, currentThread->GetPID());
 
     if(startTime == -1) startTime = stats->totalTicks;
     currentThread->totalWait += (stats->totalTicks - currentThread->lastActive);    
     currentThread->current_burst_init_value = stats->totalTicks;
+
+
+    _SWITCH(oldThread, nextThread);
+// printf("New Burst at %d\n",stats->totalTicks );
+
+
+ 
     
-    DEBUG('t', "Now in thread \"%s\"\n", currentThread->getName());
+    DEBUG('t', "Now in thread \"%s\" \n", currentThread->getName());
 
     // If the old thread gave up the processor because it was finishing,
     // we need to delete its carcass.  Note we cannot delete the thread

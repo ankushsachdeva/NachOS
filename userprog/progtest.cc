@@ -43,6 +43,7 @@ StartProcess(char *filename)
 
     space->InitRegisters();		// set the initial register values
     space->RestoreState();		// load page table register
+      // currentThread->current_burst_init_value=stats->totalTicks;
 
     machine->Run();			// jump to the user progam
     ASSERT(FALSE);			// machine->Run never returns;

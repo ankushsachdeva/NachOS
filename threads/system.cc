@@ -27,13 +27,13 @@ bool initializedConsoleSemaphores;
 bool exitThreadArray[MAX_THREAD_COUNT];  //Marks exited threads
 
 TimeSortedWaitQueue *sleepQueueHead;	// Needed to implement SC_Sleep
-
+int schedulingQuantum=-1;
+int testloopAvgBurstLength=432;
 int threadCount;
 int totalWaitTime;
 int totalBurstTime;
 int simulationTime;
 int startTime;
-
 #ifdef FILESYS_NEEDED
 FileSystem  *fileSystem;
 #endif
@@ -168,6 +168,8 @@ Initialize(int argc, char **argv)
     scheduler = new Scheduler();		// initialize the ready queue
     //if (randomYield)				// start the timer (if needed)
       // timer = new Timer(TimerInterruptHandler, 0, randomYield);
+    if(scheduling_algorithm>=3)
+        timer = new Timer(TimerInterruptHandler, 0, randomYield);
 
     threadToBeDestroyed = NULL;
 
