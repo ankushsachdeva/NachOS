@@ -57,6 +57,7 @@ Scheduler::ReadyToRun (Thread *thread)
 
     thread->setStatus(READY);
     readyList->Append((void *)thread);
+    thread->lastActive = stats->totalTicks;
 }
 
 //----------------------------------------------------------------------
@@ -211,15 +212,12 @@ Scheduler::UpdatePriorities()
 {
     List* temporary=new List;
     Thread* top;
-    temporary->SortedInsert(currentThread,currentThread->priority);
     while(1){
         top=(Thread *)readyList->Remove();
         if(top==NULL)
             break;
-        if(top != currentThread) {
-            top->unixCPU = top->unixCPU / 2;
-            top->priority = top->unixCPU / 2 + top->basePriority;
-        }
+        top->unixCPU = top->unixCPU / 2;
+        top->priority = top->unixCPU / 2 + top->basePriority;
         temporary->SortedInsert(top,top->priority);
     }
     readyList=temporary;
