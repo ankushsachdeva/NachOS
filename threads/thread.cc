@@ -380,7 +380,7 @@ Thread::Yield ()
     {
         if(priority < nextThread->priority) 
         {
-            scheduler->getReadyList->SortedInsert(nextThread, nextThread->priority);
+            scheduler->getReadyList()->SortedInsert(nextThread, nextThread->priority);
             nextThread = NULL;
         }
     }
