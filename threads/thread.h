@@ -88,6 +88,8 @@ class Thread {
     int totalWait;
     int lastActive;
     int totalBurst;
+    int unixCPU;
+    int basePriority;
 
     char* name;
     float burst_estimation;

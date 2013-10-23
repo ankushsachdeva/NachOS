@@ -116,7 +116,8 @@ StartJobs(List *jobList)
 
                   Thread* newThread;
                   newThread = new Thread((char *)elem->item, true, elem->key);
-
+                // update priority
+                  newThread->basePriority = elem->key;
                   space = new AddrSpace(executable);    
                   newThread->space = space;
                   

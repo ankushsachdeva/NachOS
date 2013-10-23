@@ -265,6 +265,7 @@ void
 Thread::Exit (bool terminateSim, int exitcode)
 {
     (void) interrupt->SetLevel(IntOff);
+    int lastBurst = (stats->totalTicks - current_burst_init_value);
     ASSERT(this == currentThread);
 
     DEBUG('t', "Finishing thread \"%s\"\n", getName());
@@ -275,25 +276,35 @@ Thread::Exit (bool terminateSim, int exitcode)
 
     //if(startTime != -1 && current_burst_init_value != -1)
     {
-      totalBurst += (stats->totalTicks - current_burst_init_value);
-      DEBUG('j', "TotalBurst :: %d %d %d\n", stats->totalTicks, current_burst_init_value, totalBurst);
+      totalBurst += lastBurst;
+
     }
     
-    burst_estimation = 0.5*((stats->totalTicks) - current_burst_init_value) + 0.5*burst_estimation;
-    
+    burst_estimation = 0.5*lastBurst + 0.5*burst_estimation;
+
+
     //
     totalWaitTime += currentThread->totalWait;
     totalBurstTime += currentThread->totalBurst;
     //
-    
+// FIXME irfan
+    //simulationTime = stats->totalTicks - startTime;
     // printf("Total Simulation time :: %d\nBurst Time :: %ld\n", simulationTime, totalBurstTime);
     //  printf("Total Wait Time :: %d\n", totalWaitTime);
     //  printf("Burst Efficiency :: %lf\n", ((double)totalBurstTime/simulationTime)*100); 
-    
+
+    printf("Sim Time %d PID :: BT%d :: Efficiency %lf\n ", (stats->totalTicks)-startTime, totalBurstTime,(totalBurstTime*1.0)/((stats->totalTicks)-startTime));
     
 
     currentThread->lastActive = stats->totalTicks;
 
+    // UNIX scheduling, update priorities
+    if (scheduling_algorithm >= 7 && lastBurst > 0)
+    {
+        unixCPU = (unixCPU + lastBurst) /2;
+        priority = unixCPU/2 + basePriority;
+        scheduler->UpdatePriorities();
+    }
 
     status = BLOCKED;
 
@@ -339,24 +350,41 @@ void
 Thread::Yield ()
 {
     Thread *nextThread;
-
+    int lastBurst = (stats->totalTicks - current_burst_init_value);
     if(startTime != -1 && current_burst_init_value != -1){
-      totalBurst += (stats->totalTicks - current_burst_init_value);
+      totalBurst += lastBurst;
 
     }
     
-    burst_estimation = 0.5*((stats->totalTicks) - 
-                                       current_burst_init_value)
-      +0.5*burst_estimation;
+    burst_estimation = 0.5*lastBurst + 0.5*burst_estimation;
 
+
+    // UNIX scheduling, update priorities
+    if (scheduling_algorithm >= 7 && lastBurst > 0)
+    {
+        unixCPU = (unixCPU + lastBurst) /2;
+        priority = unixCPU/2 + basePriority;
+        scheduler->UpdatePriorities();
+    }
 
     IntStatus oldLevel = interrupt->SetLevel(IntOff);
     
-    ASSERT(this == currentThread);
-    
+        ASSERT(this == currentThread);
+        
     DEBUG('t', "Yielding thread \"%s\"\n", getName());
     
     nextThread = scheduler->FindNextToRun();
+
+    // if yielding thread has lower priority value than nextThread,
+    // insert nextThread back in the ready queue and run current thread
+    if (scheduling_algorithm >= 7 && lastBurst > 0) 
+    {
+        if(priority < nextThread->priority) 
+        {
+            scheduler->getReadyList()->SortedInsert(nextThread, nextThread->priority);
+            nextThread = NULL;
+        }
+    }
     if (nextThread != NULL) {
 	scheduler->ReadyToRun(this);
 	scheduler->Run(nextThread);
@@ -399,20 +427,22 @@ Thread::Sleep ()
     DEBUG('l',"\n\nSleeping thread %d-%s\n\n",GetPID(),getName() );
    
     DEBUG('t', "Sleeping thread \"%s\"\n", getName());
+    int lastBurst = ((stats->totalTicks) - current_burst_init_value);
     if(startTime != -1 && current_burst_init_value != -1)
     {
-      totalBurst += (stats->totalTicks - current_burst_init_value);
-      DEBUG('j', "TotalBurst1 :: %d %d %d\n", stats->totalTicks, current_burst_init_value, totalBurst);
+      totalBurst += lastBurst;
     }
     
-    burst_estimation = 0.5*((stats->totalTicks) - 
-                                       current_burst_init_value)
-      +0.5*burst_estimation;
-    
+    burst_estimation = 0.5*lastBurst + 0.5*burst_estimation;
     status = BLOCKED;
-    currentThread->lastActive = stats->totalTicks;
 
-
+    // UNIX scheduling, update priorities
+    if (scheduling_algorithm >= 7 && lastBurst > 0)
+    {
+        unixCPU = (unixCPU + lastBurst) /2;
+        priority = unixCPU/2 + basePriority;
+        scheduler->UpdatePriorities();
+    }
 
     while(scheduler->getReadyList()->IsEmpty()){
       interrupt->Idle();
@@ -588,6 +618,7 @@ void
 Thread::Schedule()
 {
     IntStatus oldLevel = interrupt->SetLevel(IntOff);
+    lastActive = stats->totalTicks;
     scheduler->ReadyToRun(this);        // ReadyToRun assumes that interrupts
                                         // are disabled!
     (void) interrupt->SetLevel(oldLevel);
