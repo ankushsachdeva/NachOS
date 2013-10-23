@@ -30,6 +30,7 @@ class Scheduler {
 
     void Tail();			// Used by fork()
    void SortByShortestBurstTime();
+   void UpdatePriorities();
    List*  getReadyList();
   private:
     List *readyList;  		// queue of threads that are ready to run,

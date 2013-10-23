@@ -343,16 +343,23 @@ void
 Thread::Yield ()
 {
     Thread *nextThread;
-
+    int lastBurst = (stats->totalTicks - current_burst_init_value);
     if(startTime != -1 && current_burst_init_value != -1){
-      totalBurst += (stats->totalTicks - current_burst_init_value);
+      totalBurst += lastBurst;
 
     }
     
-    burst_estimation = 0.5*((stats->totalTicks) - 
-                                       current_burst_init_value)
-      +0.5*burst_estimation;
+    burst_estimation = 0.5*lastBurst + 0.5*burst_estimation;
 
+
+    // UNIX scheduling, update priorities
+    if (scheduling_algorithm >= 7 && lastBurst > 0)
+    {
+        unixCPU = (unixCPU + lastBurst) /2;
+        priority = unixCPU/2 + basePriority;
+        scheduler->UpdatePriorities();
+    }
+    currentThread->lastActive = stats->totalTicks;
 
     IntStatus oldLevel = interrupt->SetLevel(IntOff);
     
@@ -403,15 +410,23 @@ Thread::Sleep ()
     DEBUG('l',"\n\nSleeping thread %d-%s\n\n",GetPID(),getName() );
    
     DEBUG('t', "Sleeping thread \"%s\"\n", getName());
+    int lastBurst = ((stats->totalTicks) - current_burst_init_value);
     if(startTime != -1 && current_burst_init_value != -1)
     {
-      totalBurst += (stats->totalTicks - current_burst_init_value);
+      totalBurst += lastBurst;
 
     }
     
-    burst_estimation = 0.5*((stats->totalTicks) - 
-                                       current_burst_init_value)
-      +0.5*burst_estimation;
+    burst_estimation = 0.5*lastBurst + 0.5*burst_estimation;
+    // UNIX scheduling, update priorities
+    if (scheduling_algorithm >= 7 && lastBurst > 0)
+    {
+        unixCPU = (unixCPU + lastBurst) /2;
+        priority = unixCPU/2 + basePriority;
+        scheduler->UpdatePriorities();
+    }
+
+
     
     status = BLOCKED;
     currentThread->lastActive = stats->totalTicks;
@@ -592,6 +607,7 @@ void
 Thread::Schedule()
 {
     IntStatus oldLevel = interrupt->SetLevel(IntOff);
+    lastActive = stats->totalTicks;
     scheduler->ReadyToRun(this);        // ReadyToRun assumes that interrupts
                                         // are disabled!
     (void) interrupt->SetLevel(oldLevel);

@@ -128,6 +128,7 @@ Scheduler::Run (Thread *nextThread)
     currentThread->current_burst_init_value = stats->totalTicks;
 
 
+
     _SWITCH(oldThread, nextThread);
 // printf("New Burst at %d\n",stats->totalTicks );
 
@@ -190,6 +191,7 @@ Scheduler::Print()
     printf("Ready list contents:\n");
     readyList->Mapcar((VoidFunctionPtr) ThreadPrint);
 }
+
 void
 Scheduler::SortByShortestBurstTime()
 {
@@ -202,6 +204,35 @@ Scheduler::SortByShortestBurstTime()
     }
     readyList=temporary;
 }
+
+// update priorities of all processes which haven't called exit()
+void
+Scheduler::UpdatePriorities()
+{
+    List* temporary=new List;
+    Thread* top;
+    temporary->SortedInsert(currentThread,currentThread->priority);
+    while(1){
+        top=(Thread *)readyList->Remove();
+        if(top==NULL)
+            break;
+        if(top != currentThread) {
+            top->unixCPU = top->unixCPU / 2;
+            top->priority = top->unixCPU / 2 + top->basePriority;
+        }
+        temporary->SortedInsert(top,top->priority);
+    }
+    readyList=temporary;
+
+    TimeSortedWaitQueue *ptr = sleepQueueHead;
+    while(ptr != NULL) {
+        top = ptr->GetThread();
+        top->unixCPU = top->unixCPU / 2;
+        top->priority = top->unixCPU / 2 + top->basePriority;
+        ptr = ptr->GetNext();
+    }
+}
+
 List*
 Scheduler::getReadyList()
 {

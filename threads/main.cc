@@ -245,6 +245,7 @@ List* handleBatch(FILE *jobList)
                 char *curr = new char[stop];
                 for(int i = 0; i < stop-1; i++)
                         curr[i] = line[i];
+
                 elems->SortedInsert(curr, priority+50);
         }
         /*

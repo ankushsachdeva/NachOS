@@ -85,8 +85,18 @@ TimerInterruptHandler(int dummy)
            delete ptr;
         }
         //printf("[%d] Timer interrupt.\n", stats->totalTicks);
-	interrupt->YieldOnReturn();
+        interrupt->YieldOnReturn();
     }
+    // pre-emptive scheduling
+    if (scheduling_algorithm >= 3)
+    {
+        if (currentThread->current_burst_init_value + schedulingQuantum >= stats->totalTicks)
+        {
+            //currentThread->Yield();
+            interrupt->YieldOnReturn();
+        }
+    }
+    
 }
 
 //----------------------------------------------------------------------
