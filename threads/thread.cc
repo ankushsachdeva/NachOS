@@ -267,6 +267,7 @@ Thread::Exit (bool terminateSim, int exitcode)
     (void) interrupt->SetLevel(IntOff);
     int lastBurst = (stats->totalTicks - current_burst_init_value);
     ASSERT(this == currentThread);
+    DEBUG('x',"JBCJSBCSJBCJSBCJSBCJSBCJSBCJSBC value %d\n\n",lastBurst);
 
     DEBUG('t', "Finishing thread \"%s\"\n", getName());
 
@@ -279,7 +280,7 @@ Thread::Exit (bool terminateSim, int exitcode)
       totalBurst += lastBurst;
 
     }
-    
+    burstErrorEstimation+=((lastBurst - burst_estimation)<0)?(-1*(lastBurst - burst_estimation)):(lastBurst - burst_estimation);
     burst_estimation = 0.5*lastBurst + 0.5*burst_estimation;
 
 
@@ -325,6 +326,9 @@ Thread::Exit (bool terminateSim, int exitcode)
       }
       else interrupt->Idle();      // no one to run, wait for an interrupt
     }
+    if(scheduling_algorithm==2)
+      scheduler->SortByShortestBurstTime();
+    
     scheduler->Run(nextThread); // returns when we've been signalled
 }
 
@@ -355,6 +359,8 @@ Thread::Yield ()
       totalBurst += lastBurst;
 
     }
+    DEBUG('x',"JBCJSBCSJBCJSBCJSBCJSBCJSBCJSBC value %d\n\n",lastBurst);
+    burstErrorEstimation+=((lastBurst - burst_estimation)<0)?(-1*(lastBurst - burst_estimation)):(lastBurst - burst_estimation);
     
     burst_estimation = 0.5*lastBurst + 0.5*burst_estimation;
 
@@ -372,6 +378,8 @@ Thread::Yield ()
         ASSERT(this == currentThread);
         
     DEBUG('t', "Yielding thread \"%s\"\n", getName());
+    if(scheduling_algorithm==2)
+      scheduler->SortByShortestBurstTime();
     
     nextThread = scheduler->FindNextToRun();
 
@@ -428,10 +436,12 @@ Thread::Sleep ()
    
     DEBUG('t', "Sleeping thread \"%s\"\n", getName());
     int lastBurst = ((stats->totalTicks) - current_burst_init_value);
+    DEBUG('x',"JBCJSBCSJBCJSBCJSBCJSBCJSBCJSBC value %d\n\n",lastBurst);
     if(startTime != -1 && current_burst_init_value != -1)
     {
       totalBurst += lastBurst;
     }
+    burstErrorEstimation+=((lastBurst - burst_estimation)<0)?(-1*(lastBurst - burst_estimation)):(lastBurst - burst_estimation);
     
     burst_estimation = 0.5*lastBurst + 0.5*burst_estimation;
     status = BLOCKED;

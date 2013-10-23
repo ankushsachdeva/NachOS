@@ -44,7 +44,7 @@ extern int totalBurstTime;
 extern int simulationTime;
 extern int startTime;
 extern int scheduling_algorithm;
-
+extern int burstErrorEstimation;
 class TimeSortedWaitQueue {		// Needed to implement SC_Sleep
 private:
    Thread *t;				// Thread pointer of the sleeping thread

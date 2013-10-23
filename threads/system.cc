@@ -28,12 +28,13 @@ bool exitThreadArray[MAX_THREAD_COUNT];  //Marks exited threads
 
 TimeSortedWaitQueue *sleepQueueHead;	// Needed to implement SC_Sleep
 int schedulingQuantum=-1;
-int testloopAvgBurstLength=432;
+int testloopAvgBurstLength=120;
 int threadCount;
 int totalWaitTime;
 int totalBurstTime;
 int simulationTime;
 int startTime;
+int burstErrorEstimation=0;
 #ifdef FILESYS_NEEDED
 FileSystem  *fileSystem;
 #endif
@@ -87,6 +88,7 @@ TimerInterruptHandler(int dummy)
         //printf("[%d] Timer interrupt.\n", stats->totalTicks);
         interrupt->YieldOnReturn();
     }
+
     // pre-emptive scheduling
     if (scheduling_algorithm >= 3)
     {
