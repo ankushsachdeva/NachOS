@@ -114,13 +114,19 @@ ExceptionHandler(ExceptionType which)
        printf("Thread Count : %d\n",threadCount);
        if(threadCount==1){
 
-        printf("Total Simulation time :: %d\nBurst Time :: %ld\n", simulationTime, totalBurstTime);
+         currentThread->totalBurst += (stats->totalTicks - currentThread->current_burst_init_value);
+
+         //
+         totalWaitTime += currentThread->totalWait;
+         totalBurstTime += currentThread->totalBurst;
+         //
+         simulationTime = stats->totalTicks - startTime;
+         printf("Total Simulation time :: %d\nBurst Time :: %ld\n", simulationTime, totalBurstTime);
+         printf("Start Time :: %d\n", startTime);
          printf("Total Wait Time :: %d\n", totalWaitTime);
          printf("Burst Efficiency :: %lf\n", ((double)totalBurstTime/simulationTime)*100); 
+
          
-         // printf("Total Simulation time :: %d\nBurst Time :: %ld\n", simulationTime, totalBurstTime);
-         // printf("Total Wait Time :: %d\n", totalWaitTime);
-         // printf("Burst Efficiency :: %lf\n", ((double)totalBurstTime/simulationTime)*100); 
          interrupt->Halt();
        }
 

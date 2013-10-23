@@ -123,7 +123,10 @@ Scheduler::Run (Thread *nextThread)
 
     // printf("CCC :: %d PID :: %d\n", currentThread->current_burst_init_value, currentThread->GetPID());
 
-    if(startTime == -1) startTime = stats->totalTicks;
+    if(startTime == -1){
+      startTime = stats->totalTicks;
+      DEBUG('j', "StartTime :: %d %d %d\n", stats->totalTicks, stats->systemTicks, stats->userTicks);
+    }
     currentThread->totalWait += (stats->totalTicks - currentThread->lastActive);    
     currentThread->current_burst_init_value = stats->totalTicks;
 

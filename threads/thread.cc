@@ -273,27 +273,23 @@ Thread::Exit (bool terminateSim, int exitcode)
 
     Thread *nextThread;
 
-    if(startTime != -1 && current_burst_init_value != -1)
+    //if(startTime != -1 && current_burst_init_value != -1)
     {
       totalBurst += (stats->totalTicks - current_burst_init_value);
-
+      DEBUG('j', "TotalBurst :: %d %d %d\n", stats->totalTicks, current_burst_init_value, totalBurst);
     }
     
-    burst_estimation = 0.5*((stats->totalTicks) - 
-                                       current_burst_init_value)
-      +0.5*burst_estimation;
-
-
-       //
-       totalWaitTime += currentThread->totalWait;
-       totalBurstTime += currentThread->totalBurst;
-       //
-       simulationTime = stats->totalTicks - startTime;
-        // printf("Total Simulation time :: %d\nBurst Time :: %ld\n", simulationTime, totalBurstTime);
-        //  printf("Total Wait Time :: %d\n", totalWaitTime);
-        //  printf("Burst Efficiency :: %lf\n", ((double)totalBurstTime/simulationTime)*100); 
-
-    printf("Sim Time %d PID :: BT%d :: Efficiency %lf\n ", (stats->totalTicks)-startTime, totalBurstTime,(totalBurstTime*1.0)/((stats->totalTicks)-startTime));
+    burst_estimation = 0.5*((stats->totalTicks) - current_burst_init_value) + 0.5*burst_estimation;
+    
+    //
+    totalWaitTime += currentThread->totalWait;
+    totalBurstTime += currentThread->totalBurst;
+    //
+    
+    // printf("Total Simulation time :: %d\nBurst Time :: %ld\n", simulationTime, totalBurstTime);
+    //  printf("Total Wait Time :: %d\n", totalWaitTime);
+    //  printf("Burst Efficiency :: %lf\n", ((double)totalBurstTime/simulationTime)*100); 
+    
     
 
     currentThread->lastActive = stats->totalTicks;
@@ -310,13 +306,13 @@ Thread::Exit (bool terminateSim, int exitcode)
     }
 
     while ((nextThread = scheduler->FindNextToRun()) == NULL) {
-        if (terminateSim) {
-           DEBUG('i', "Machine idle.  No interrupts to do.\n");
-           printf("\nNo threads ready or runnable, and no pending interrupts.\n");
-           printf("Assuming all programs completed.\n");
-           interrupt->Halt();
-        }
-        else interrupt->Idle();      // no one to run, wait for an interrupt
+      if (terminateSim) {
+        DEBUG('i', "Machine idle.  No interrupts to do.\n");
+        printf("\nNo threads ready or runnable, and no pending interrupts.\n");
+        printf("Assuming all programs completed.\n");
+        interrupt->Halt();
+      }
+      else interrupt->Idle();      // no one to run, wait for an interrupt
     }
     scheduler->Run(nextThread); // returns when we've been signalled
 }
@@ -406,7 +402,7 @@ Thread::Sleep ()
     if(startTime != -1 && current_burst_init_value != -1)
     {
       totalBurst += (stats->totalTicks - current_burst_init_value);
-
+      DEBUG('j', "TotalBurst1 :: %d %d %d\n", stats->totalTicks, current_burst_init_value, totalBurst);
     }
     
     burst_estimation = 0.5*((stats->totalTicks) - 
