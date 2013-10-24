@@ -114,17 +114,30 @@ ExceptionHandler(ExceptionType which)
        threadCount--;
        printf("Thread Count : %d\n",threadCount);
        if(threadCount==1){
+
          ASSERT(currentThread->current_burst_init_value >= 0);
-         currentThread->totalBurst += (stats->totalTicks - currentThread->current_burst_init_value);
+         
+         int lastBurst = (stats->totalTicks - currentThread->current_burst_init_value);
+         currentThread->totalBurst += lastBurst;
+
 
          //
          totalWaitTime += currentThread->totalWait;
+         num_waits++;
          totalBurstTime += currentThread->totalBurst;
+         if(lastBurst>0) {
+             num_bursts++;
+             if(lastBurst < min_burst) min_burst = lastBurst;
+         }
+         if(lastBurst>max_burst) max_burst=lastBurst;
          //
          simulationTime = stats->totalTicks - startTime;
          printf("Total Simulation time :: %d\nBurst Time :: %ld\n", simulationTime, totalBurstTime);
+         printf("Maximum Burst :: %d Minimum Burst :: %d\n", max_burst, min_burst);
+         printf("Number of bursts:: %d  Average Burst Time :: %d\n", num_bursts, totalBurstTime/ num_bursts);
          printf("Start Time :: %d\n", startTime);
          printf("Total Wait Time :: %d\n", totalWaitTime);
+         printf("Average Wait Time :: %d\n", totalWaitTime/ num_waits);
          printf("Burst Efficiency :: %lf\n", ((double)totalBurstTime/simulationTime)*100); 
          if(scheduling_algorithm==2)
             printf("Burst Time Estimation Error :: %lf\n",(double)burstErrorEstimation/totalBurstTime);

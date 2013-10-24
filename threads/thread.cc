@@ -292,18 +292,20 @@ Thread::Exit (bool terminateSim, int exitcode)
 
     //
     totalWaitTime += currentThread->totalWait;
+    num_waits++;
     totalBurstTime += currentThread->totalBurst;
+    if(lastBurst>0) {
+        num_bursts++;
+        if(lastBurst < min_burst) min_burst = lastBurst;
+    }
+    if(lastBurst>max_burst) max_burst=lastBurst;
     //
-// FIXME irfan
-    //simulationTime = stats->totalTicks - startTime;
     // printf("Total Simulation time :: %d\nBurst Time :: %ld\n", simulationTime, totalBurstTime);
     //  printf("Total Wait Time :: %d\n", totalWaitTime);
     //  printf("Burst Efficiency :: %lf\n", ((double)totalBurstTime/simulationTime)*100); 
 
-    printf("Sim Time %d PID :: BT%d :: Efficiency %lf\n ", (stats->totalTicks)-startTime, totalBurstTime,(totalBurstTime*1.0)/((stats->totalTicks)-startTime));
+    printf("Sim Time %d PID :: BT%d :: Efficiency %lf Completion time :: %d\n ", (stats->totalTicks)-startTime, totalBurstTime,(totalBurstTime*1.0)/((stats->totalTicks)-startTime), stats->totalTicks);
     
-
-    currentThread->lastActive = stats->totalTicks;
 
     // UNIX scheduling, update priorities
     if (scheduling_algorithm >= 7 && lastBurst > 0)
@@ -371,7 +373,14 @@ Thread::Yield ()
       totalBurst += lastBurst;
 
     }
-    //current_burst_init_value = -1;
+
+    current_burst_init_value = -1;
+
+    if(lastBurst>0) {
+        num_bursts++;
+        if(lastBurst < min_burst) min_burst = lastBurst;
+    }
+    if(lastBurst>max_burst) max_burst=lastBurst;
 
     DEBUG('x',"JBCJSBCSJBCJSBCJSBCJSBCJSBCJSBC value %d\n\n",lastBurst);
     burstErrorEstimation+=((lastBurst - burst_estimation)<0)?(-1*(lastBurst - burst_estimation)):(lastBurst - burst_estimation);
@@ -463,6 +472,11 @@ Thread::Sleep ()
     {
       totalBurst += lastBurst;
     }
+    if(lastBurst>0) {
+        num_bursts++;
+        if(lastBurst < min_burst) min_burst = lastBurst;
+    }
+    if(lastBurst>max_burst) max_burst=lastBurst;
     burstErrorEstimation+=((lastBurst - burst_estimation)<0)?(-1*(lastBurst - burst_estimation)):(lastBurst - burst_estimation);
 
     //current_burst_init_value = -1;
