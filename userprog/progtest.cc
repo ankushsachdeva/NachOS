@@ -93,6 +93,38 @@ ConsoleTest (char *in, char *out)
 
 /////////////////////////////////////////////////////////////////////////
 
+
+static void
+TimerInterruptHandler(int dummy)
+{
+    TimeSortedWaitQueue *ptr;
+    if (interrupt->getStatus() != IdleMode) {
+        // Check the head of the sleep queue
+        while ((sleepQueueHead != NULL) && (sleepQueueHead->GetWhen() <= (unsigned)stats->totalTicks)) {
+           sleepQueueHead->GetThread()->Schedule();
+           ptr = sleepQueueHead;
+           sleepQueueHead = sleepQueueHead->GetNext();
+           delete ptr;
+        }
+        //printf("[%d] Timer interrupt.\n", stats->totalTicks);
+        interrupt->YieldOnReturn();
+    }
+    //printf("AAAA\n");
+    // pre-emptive scheduling
+    if (scheduling_algorithm >= 3)
+    {
+      DEBUG('j', "S1cheduling :: %d\n", schedulingQuantum);
+        if (currentThread->current_burst_init_value + schedulingQuantum >= stats->totalTicks)
+        {
+            //currentThread->Yield();
+            interrupt->YieldOnReturn();
+        }
+        
+    }
+    
+}
+
+
 void
 StartJobs(List *jobList)
 {
@@ -135,6 +167,11 @@ StartJobs(List *jobList)
           elem = elem->next;
           printf("Done\n");
   }
+  if(scheduling_algorithm>=3){
+    printf("BBBB\n");
+    timer = new Timer(TimerInterruptHandler, 0, FALSE);
+  }
+
   
   currentThread->Finish();
   //machine->Run();			// jump to the user progam

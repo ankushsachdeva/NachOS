@@ -130,7 +130,8 @@ Scheduler::Run (Thread *nextThread)
     }
     currentThread->totalWait += (stats->totalTicks - currentThread->lastActive);    
     currentThread->current_burst_init_value = stats->totalTicks;
-
+    if(currentThread->startingTime == -1) currentThread->startingTime = stats->totalTicks;
+    
 
 
     _SWITCH(oldThread, nextThread);

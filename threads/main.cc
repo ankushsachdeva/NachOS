@@ -64,6 +64,7 @@ extern void StartJobs(List* jobL);
 List* handleBatch(FILE *jobList); 
 extern int threadCount;
 
+
 //----------------------------------------------------------------------
 // main
 // 	Bootstrap the operating system kernel.  
@@ -122,6 +123,7 @@ main(int argc, char **argv)
                 ASSERT(!(inp == NULL));
                 List *jobL;
                 jobL = handleBatch(inp);
+                
                 StartJobs(jobL);
         }
 #endif // USER_PROGRAM
@@ -158,6 +160,8 @@ main(int argc, char **argv)
 #endif // NETWORK
     }
 
+
+    
     currentThread->Finish();	// NOTE: if the procedure "main" 
 				// returns, then the program "nachos"
 				// will exit (as any other normal program
@@ -191,6 +195,7 @@ List* handleBatch(FILE *jobList)
         else if(scheduling_algorithm==5||scheduling_algorithm==9){
             schedulingQuantum=3*testloopAvgBurstLength/4;
         }
+        schedulingQuantum=100;
 
         DEBUG('l',"Starting reading of batch file.Will be using scheduling_algorithm %d\n",scheduling_algorithm);
         while(fgets(line, 1000, jobList) != NULL)

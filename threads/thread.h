@@ -90,6 +90,7 @@ class Thread {
     int totalBurst;
     int unixCPU;
     int basePriority;
+    int startingTime;
 
     char* name;
     float burst_estimation;

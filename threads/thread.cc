@@ -45,6 +45,7 @@ Thread::Thread(char* threadName)
     totalBurst = 0;
     current_burst_init_value = -1;
     priority = 100;
+    startingTime = -1;
 
     name = threadName;
     stackTop = NULL;
@@ -55,7 +56,7 @@ Thread::Thread(char* threadName)
 #endif
 
     threadArray[thread_index] = this;
-    printf("pid =%d\n",thread_index);
+    printf("pid2 =%d\n",thread_index);
     pid = thread_index;
     burst_estimation=0;
     
@@ -82,7 +83,9 @@ Thread::Thread(char* threadName, bool orphan, int prio)
     totalWait = 0;
     lastActive = stats->totalTicks;
     totalBurst = 0;
-    current_burst_init_value = -1;    
+    
+    //current_burst_init_value = -1;
+    startingTime = -1;
 
     name = threadName;
     stackTop = NULL;
@@ -265,7 +268,10 @@ void
 Thread::Exit (bool terminateSim, int exitcode)
 {
     (void) interrupt->SetLevel(IntOff);
+    ASSERT(current_burst_init_value >= 0);
     int lastBurst = (stats->totalTicks - current_burst_init_value);
+    //current_burst_init_value = -1;
+
     ASSERT(this == currentThread);
     DEBUG('x',"JBCJSBCSJBCJSBCJSBCJSBCJSBCJSBC value %d\n\n",lastBurst);
 
@@ -274,7 +280,7 @@ Thread::Exit (bool terminateSim, int exitcode)
     threadToBeDestroyed = currentThread;
 
     Thread *nextThread;
-
+    ASSERT(startTime != -1);
     //if(startTime != -1 && current_burst_init_value != -1)
     {
       totalBurst += lastBurst;
@@ -354,11 +360,19 @@ void
 Thread::Yield ()
 {
     Thread *nextThread;
+    
+    DEBUG('t', "Yeild Started %s\n", getName()); 
+    ASSERT(startTime >= 0);
+    ASSERT(current_burst_init_value >= 0);
     int lastBurst = (stats->totalTicks - current_burst_init_value);
+    
+
     if(startTime != -1 && current_burst_init_value != -1){
       totalBurst += lastBurst;
 
     }
+    //current_burst_init_value = -1;
+
     DEBUG('x',"JBCJSBCSJBCJSBCJSBCJSBCJSBCJSBC value %d\n\n",lastBurst);
     burstErrorEstimation+=((lastBurst - burst_estimation)<0)?(-1*(lastBurst - burst_estimation)):(lastBurst - burst_estimation);
     
@@ -382,20 +396,28 @@ Thread::Yield ()
       scheduler->SortByShortestBurstTime();
     
     nextThread = scheduler->FindNextToRun();
-
+    
     // if yielding thread has lower priority value than nextThread,
     // insert nextThread back in the ready queue and run current thread
+    
     if (scheduling_algorithm >= 7 && lastBurst > 0) 
     {
-        if(priority < nextThread->priority) 
+        if(nextThread !=NULL && priority < nextThread->priority) 
         {
+             
             scheduler->getReadyList()->SortedInsert(nextThread, nextThread->priority);
+            
             nextThread = NULL;
         }
     }
+    
     if (nextThread != NULL) {
 	scheduler->ReadyToRun(this);
 	scheduler->Run(nextThread);
+    }
+    if(nextThread == NULL)
+    {
+            current_burst_init_value = stats->totalTicks;
     }
     (void) interrupt->SetLevel(oldLevel);
 }
@@ -423,7 +445,7 @@ void
 Thread::Sleep ()
 {
     Thread *nextThread;
-    
+    if(pid != 0)ASSERT(current_burst_init_value >= 0);    
 
     ASSERT(totalBurst >= 0);
     DEBUG('k', "\nTotalBurst :: %d %d PID :: %d\n", totalBurst, stats->totalTicks, pid);
@@ -442,6 +464,8 @@ Thread::Sleep ()
       totalBurst += lastBurst;
     }
     burstErrorEstimation+=((lastBurst - burst_estimation)<0)?(-1*(lastBurst - burst_estimation)):(lastBurst - burst_estimation);
+
+    //current_burst_init_value = -1;
     
     burst_estimation = 0.5*lastBurst + 0.5*burst_estimation;
     status = BLOCKED;

@@ -108,12 +108,13 @@ ExceptionHandler(ExceptionType which)
     else if ((which == SyscallException) && (type == SC_Exit)) {
        exitcode = machine->ReadRegister(4);
        printf("[pid %d]: Exit called. Code: %d %s\n", currentThread->GetPID(), exitcode, currentThread->name);
-       printf("WaitTime :: %d, TotalBurst :: %d\n", currentThread->totalWait, currentThread->totalBurst);
+       printf("WaitTime :: %d , TotalBurst :: %d , ", currentThread->totalWait, currentThread->totalBurst);
+       printf("ExecutionTime :: %d\n", stats->totalTicks-currentThread->startingTime);
 
        threadCount--;
        printf("Thread Count : %d\n",threadCount);
        if(threadCount==1){
-
+         ASSERT(currentThread->current_burst_init_value >= 0);
          currentThread->totalBurst += (stats->totalTicks - currentThread->current_burst_init_value);
 
          //

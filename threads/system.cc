@@ -88,15 +88,17 @@ TimerInterruptHandler(int dummy)
         //printf("[%d] Timer interrupt.\n", stats->totalTicks);
         interrupt->YieldOnReturn();
     }
-
+    //printf("AAAA\n");
     // pre-emptive scheduling
     if (scheduling_algorithm >= 3)
     {
+      DEBUG('j', "Scheduling :: %d\n", schedulingQuantum);
         if (currentThread->current_burst_init_value + schedulingQuantum >= stats->totalTicks)
         {
             //currentThread->Yield();
             interrupt->YieldOnReturn();
         }
+        
     }
     
 }
@@ -180,9 +182,10 @@ Initialize(int argc, char **argv)
     scheduler = new Scheduler();		// initialize the ready queue
     //if (randomYield)				// start the timer (if needed)
       // timer = new Timer(TimerInterruptHandler, 0, randomYield);
-    if(scheduling_algorithm>=3)
-        timer = new Timer(TimerInterruptHandler, 0, randomYield);
-
+    if(scheduling_algorithm>=3){
+      printf("BBBB\n");
+      timer = new Timer(TimerInterruptHandler, 0, randomYield);
+    }
     threadToBeDestroyed = NULL;
 
     // We didn't explicitly allocate the current thread we are running in.
