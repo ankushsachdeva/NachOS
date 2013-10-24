@@ -191,6 +191,8 @@ List* handleBatch(FILE *jobList)
         else if(scheduling_algorithm==5||scheduling_algorithm==9){
             schedulingQuantum=3*testloopAvgBurstLength/4;
         }
+        // for testing
+        schedulingQuantum = 100;
 
         DEBUG('l',"Starting reading of batch file.Will be using scheduling_algorithm %d\n",scheduling_algorithm);
         while(fgets(line, 1000, jobList) != NULL)
@@ -246,7 +248,10 @@ List* handleBatch(FILE *jobList)
                 for(int i = 0; i < stop-1; i++)
                         curr[i] = line[i];
 
-                elems->SortedInsert(curr, priority+50);
+                if(scheduling_algorithm >= 7 )
+                    elems->SortedInsert(curr, priority+50);
+                else
+                    elems->SortedInsert(curr, priority);
         }
         /*
         ListElement *elem = elems->getFirst();
