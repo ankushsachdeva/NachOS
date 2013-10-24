@@ -45,7 +45,7 @@ Thread::Thread(char* threadName)
     totalBurst = 0;
     current_burst_init_value = -1;
     priority = 100;
-    startingTime = -1;
+    startingTime = stats->totalTicks;
 
     name = threadName;
     stackTop = NULL;
@@ -85,7 +85,7 @@ Thread::Thread(char* threadName, bool orphan, int prio)
     totalBurst = 0;
     
     //current_burst_init_value = -1;
-    startingTime = -1;
+    startingTime = stats->totalTicks;
 
     name = threadName;
     stackTop = NULL;
@@ -271,6 +271,8 @@ Thread::Exit (bool terminateSim, int exitcode)
     ASSERT(current_burst_init_value >= 0);
     int lastBurst = (stats->totalTicks - current_burst_init_value);
     //current_burst_init_value = -1;
+    completionTimeArray[pid] = stats->totalTicks;
+
 
     ASSERT(this == currentThread);
     DEBUG('x',"JBCJSBCSJBCJSBCJSBCJSBCJSBCJSBC value %d\n\n",lastBurst);
@@ -294,11 +296,17 @@ Thread::Exit (bool terminateSim, int exitcode)
     totalWaitTime += currentThread->totalWait;
     num_waits++;
     totalBurstTime += currentThread->totalBurst;
+    
+
     if(lastBurst>0) {
         num_bursts++;
         if(lastBurst < min_burst) min_burst = lastBurst;
     }
     if(lastBurst>max_burst) max_burst=lastBurst;
+    printf("WaitTime :: %d , TotalBurst :: %d , ", currentThread->totalWait, currentThread->totalBurst);
+    printf("ExecutionTime :: %d\n", stats->totalTicks-currentThread->startingTime);
+
+
     //
     // printf("Total Simulation time :: %d\nBurst Time :: %ld\n", simulationTime, totalBurstTime);
     //  printf("Total Wait Time :: %d\n", totalWaitTime);

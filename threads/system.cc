@@ -39,6 +39,8 @@ int max_burst=-1;
 int simulationTime;
 int startTime;
 int burstErrorEstimation=0;
+int completionTimeArray[MAX_THREAD_COUNT];
+
 #ifdef FILESYS_NEEDED
 FileSystem  *fileSystem;
 #endif

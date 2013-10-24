@@ -65,6 +65,36 @@ ForkStartFunction (int dummy)
    machine->Run();
 }
 
+void completionStats()
+{
+  int sum = 0;
+  double avg;
+  for(int i = 1; i < thread_index; i++)
+    sum += completionTimeArray[i];
+  
+  avg = ((double)sum)/(thread_index-1);
+
+  double var = 0;
+  for(int i = 1; i < thread_index; i++)
+    var += (completionTimeArray[i] - avg)*(completionTimeArray[i] - avg);
+  
+  var /= (thread_index-1);
+  
+  int maxCompletion = 0;
+  for(int i = 1; i < thread_index; i++)
+    if(maxCompletion < completionTimeArray[i])
+      maxCompletion = completionTimeArray[i];
+  int minCompletion = 10000000;
+  for(int i = 1; i < thread_index; i++)
+    if(minCompletion > completionTimeArray[i])
+      minCompletion = completionTimeArray[i];
+  printf("Maximum Completion Time :: %d\n", maxCompletion);
+  printf("Minimum Completion Time :: %d\n", minCompletion);
+  printf("Average Completion Time :: %lf\n", avg);
+  printf("Variance of Completion Time :: %lf\n", var);
+  
+}
+
 static void ConvertIntToHex (unsigned v, Console *console)
 {
    unsigned x;
@@ -108,13 +138,15 @@ ExceptionHandler(ExceptionType which)
     else if ((which == SyscallException) && (type == SC_Exit)) {
        exitcode = machine->ReadRegister(4);
        printf("[pid %d]: Exit called. Code: %d %s\n", currentThread->GetPID(), exitcode, currentThread->name);
-       printf("WaitTime :: %d , TotalBurst :: %d , ", currentThread->totalWait, currentThread->totalBurst);
-       printf("ExecutionTime :: %d\n", stats->totalTicks-currentThread->startingTime);
 
        threadCount--;
        printf("Thread Count : %d\n",threadCount);
        if(threadCount==1){
+         printf("WaitTime :: %d , TotalBurst :: %d , ", currentThread->totalWait, currentThread->totalBurst);
+         printf("ExecutionTime :: %d\n", stats->totalTicks-currentThread->startingTime);
 
+
+         completionTimeArray[currentThread->GetPID()] = stats->totalTicks;
          ASSERT(currentThread->current_burst_init_value >= 0);
          
          int lastBurst = (stats->totalTicks - currentThread->current_burst_init_value);
@@ -125,10 +157,12 @@ ExceptionHandler(ExceptionType which)
          totalWaitTime += currentThread->totalWait;
          num_waits++;
          totalBurstTime += currentThread->totalBurst;
+
          if(lastBurst>0) {
              num_bursts++;
              if(lastBurst < min_burst) min_burst = lastBurst;
          }
+
          if(lastBurst>max_burst) max_burst=lastBurst;
          //
          simulationTime = stats->totalTicks - startTime;
@@ -140,8 +174,9 @@ ExceptionHandler(ExceptionType which)
          printf("Average Wait Time :: %d\n", totalWaitTime/ num_waits);
          printf("Burst Efficiency :: %lf\n", ((double)totalBurstTime/simulationTime)*100); 
          if(scheduling_algorithm==2)
-            printf("Burst Time Estimation Error :: %lf\n",(double)burstErrorEstimation/totalBurstTime);
-         
+           printf("Burst Time Estimation Error :: %lf\n",(double)burstErrorEstimation/totalBurstTime);
+
+         completionStats();
          interrupt->Halt();
        }
 

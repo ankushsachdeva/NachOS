@@ -197,7 +197,7 @@ List* handleBatch(FILE *jobList)
         }
 
         // for testing
-        schedulingQuantum = 100;
+        // schedulingQuantum = 100;
 
         DEBUG('l',"Starting reading of batch file.Will be using scheduling_algorithm %d\n",scheduling_algorithm);
         while(fgets(line, 1000, jobList) != NULL)
