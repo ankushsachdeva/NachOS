@@ -1,0 +1,41 @@
+Referring to mail
+Testing Scheduling Algorithms
+
+You need to put a little extra effort to figure out if the non-preemptive shortest next CPU burst first algorithm and the UNIX scheduling algorithm are working fine. To this end, I will require you to submit a few things in addition to what has already been mentioned in the assignment.
+
+Please put the attached testloop4.c, testloop5.c, and Makefile in the nachos/code/test/ directory.
+
+For evaluating the difference between the two non-preemptive algorithms, use testloop4 and testloop5 programs. The primary difference between these two programs is that the inner loop size of testloop5 is smaller compared to testloop4. Prepare a batch of ten jobs such that the first five jobs are testloop4 and the last five jobs are testloop5. For this batch, report the average waiting time in the ready queue for the two non-preemptive algorithms. Explain your results. Additionally, for each of the five batches, report the estimation error in CPU bursts for the second non-preemptive
+algorithm. This is how you should compute the error: Compute the absolute value of the error in CPU burst estimation at the end of each non-zero burst. Accumulate these into a single sum. Report this sum divided by the sum total of all CPU bursts. The smaller this number, the better is the estimation. You should verify that this ratio gradually goes down as OUTER_BOUND is increased. Explain why this should happen.
+
+For evaluating the difference between round-robin and the UNIX scheduling algorithms, prepare a batch of ten testloop.c jobs. Assign priority to
+these jobs in the order 100, 90, ..., 10. Report the maximum, minimum, average, and variance of job completion times (exclude the main thread's
+completion time from these statistics) for this batch running with round-robin and the UNIX scheduling algorithms. Explain your results. Completion time of a thread is defined as the totalTicks when the thread calls exit.
+
+I have included these in the assignment text on course home.
+
+
+
+Non-preemptive
+
+372052->ShortestBurstTime
+
+
+
+Simple
+
+Total Simulation time :: 57720
+Burst Time :: 57720
+Start Time :: 110
+Total Wait Time :: 518500
+Burst Efficiency :: 100.000000
+
+
+ShortestBurst
+
+Total Simulation time :: 57720
+Burst Time :: 57720
+Start Time :: 110
+Total Wait Time :: 372052
+Burst Efficiency :: 100.000000
+Burst Time Estimation Error :: 0.662335

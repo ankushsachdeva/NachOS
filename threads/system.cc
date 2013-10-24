@@ -38,6 +38,7 @@ int min_burst=1000000;
 int max_burst=-1;
 int simulationTime;
 int startTime;
+int burstErrorEstimation=0;
 #ifdef FILESYS_NEEDED
 FileSystem  *fileSystem;
 #endif
@@ -91,6 +92,7 @@ TimerInterruptHandler(int dummy)
         //printf("[%d] Timer interrupt.\n", stats->totalTicks);
         interrupt->YieldOnReturn();
     }
+
     // pre-emptive scheduling
     if (scheduling_algorithm >= 3)
     {

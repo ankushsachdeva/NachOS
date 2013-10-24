@@ -134,7 +134,8 @@ ExceptionHandler(ExceptionType which)
          printf("Total Wait Time :: %d\n", totalWaitTime);
          printf("Average Wait Time :: %d\n", totalWaitTime/ num_waits);
          printf("Burst Efficiency :: %lf\n", ((double)totalBurstTime/simulationTime)*100); 
-
+         if(scheduling_algorithm==2)
+            printf("Burst Time Estimation Error :: %lf\n",(double)burstErrorEstimation/totalBurstTime);
          
          interrupt->Halt();
        }
@@ -207,6 +208,7 @@ ExceptionHandler(ExceptionType which)
        machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg)+4);
     }
     else if ((which == SyscallException) && (type == SC_PrintInt)) {
+
        printval = machine->ReadRegister(4);
        if (printval == 0) {
           writeDone->P() ;

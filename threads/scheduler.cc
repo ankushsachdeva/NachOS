@@ -199,6 +199,7 @@ Scheduler::Print()
 void
 Scheduler::SortByShortestBurstTime()
 {
+    DEBUG('r',"\n\n\nI was called\n\n\n");
     List* temporary=new List;
     while(1){
         Thread* current=(Thread *)readyList->Remove();
