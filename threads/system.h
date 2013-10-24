@@ -49,6 +49,7 @@ extern int min_burst;
 extern int totalBurstTime;
 extern int simulationTime;
 extern int startTime;
+extern int TimerTicks;    	// (average) time between timer interrupts
 extern int scheduling_algorithm;
 extern int burstErrorEstimation;
 extern int completionTimeArray[];

@@ -299,6 +299,7 @@ Thread::Exit (bool terminateSim, int exitcode)
     
 
     if(lastBurst>0) {
+        DEBUG('t',"lastBurst::%d totalBurst:: %d pid:: %d totalticks:: %d\n",lastBurst,totalBurst, pid, stats->totalTicks);
         num_bursts++;
         if(lastBurst < min_burst) min_burst = lastBurst;
     }
@@ -385,6 +386,7 @@ Thread::Yield ()
     current_burst_init_value = -1;
 
     if(lastBurst>0) {
+        DEBUG('t',"lastBurst::%d totalBurst:: %d pid:: %d totalticks:: %d\n",lastBurst,totalBurst, pid, stats->totalTicks);
         num_bursts++;
         if(lastBurst < min_burst) min_burst = lastBurst;
     }
@@ -481,6 +483,7 @@ Thread::Sleep ()
       totalBurst += lastBurst;
     }
     if(lastBurst>0) {
+        DEBUG('t',"lastBurst::%d totalBurst:: %d pid:: %d totalticks:: %d\n",lastBurst,totalBurst, pid, stats->totalTicks);
         num_bursts++;
         if(lastBurst < min_burst) min_burst = lastBurst;
     }

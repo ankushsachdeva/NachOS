@@ -33,6 +33,7 @@ int threadCount;
 int totalWaitTime;
 int num_waits = 0;
 int totalBurstTime;
+int TimerTicks=100;    	// (average) time between timer interrupts
 int num_bursts=0;
 int min_burst=1000000;
 int max_burst=-1;
